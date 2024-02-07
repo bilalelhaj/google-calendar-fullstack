@@ -23,7 +23,7 @@ router.get("/", (req: Request, res: Response) => {
         process.env.GOOGLE_REDIRECT_URI!
     )}&scope=${encodeURIComponent(
         scopes.join(" ")
-    )}&access_type=online&prompt=consent`;
+    )}&access_type=offline&prompt=consent`;
 
     res.redirect(authUrl);
 });
