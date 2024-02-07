@@ -54,7 +54,12 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
         req.session!.userId = decoded.sub;
         req.session!.accessToken = response.data.access_token;
 
-        res.cookie('session_token', response.data.access_token, {httpOnly: true, secure: true, sameSite: 'strict'});
+        // res.cookie('session_token', response.data.access_token, {httpOnly: true, secure: true, sameSite: 'strict'});
+        res.cookie('session_token', response.data.access_token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+        });
 
         const userCollection = db.collection('users');
         await userCollection.doc(decoded.sub!).set({
@@ -87,7 +92,9 @@ router.post("/disconnect", async (req: Request, res: Response) => {
 
 router.get('/verify-session', (req, res) => {
     const sessionToken = req.cookies['session_token'];
-    console.log("sessionToken", sessionToken);
+    console.log("sessionToken from cookie:", sessionToken);
+    console.log("accessToken from session:", req.session!.accessToken);
+
 
     if (!sessionToken || !req.session!.accessToken) {
         return res.sendStatus(401);
