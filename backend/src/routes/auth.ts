@@ -55,18 +55,27 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
         req.session!.accessToken = response.data.access_token;
 
         // res.cookie('session_token', response.data.access_token, {httpOnly: true, secure: true, sameSite: 'strict'});
-        res.cookie('session_token', response.data.access_token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-        });
+        req.session!.save(err => {
+            if (err) {
+                console.log('Error saving session:', err);
+            }
 
-        const userCollection = db.collection('users');
-        await userCollection.doc(decoded.sub!).set({
-            email: decoded.email,
-        });
+            res.cookie('session_token', response.data.access_token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none'
+            });
 
-        res.redirect(process.env.REACT_APP_APP_URL!);
+            const userCollection = db.collection('users');
+            userCollection.doc(decoded.sub!).set({
+                email: decoded.email,
+            }).then(() => {
+                res.redirect(process.env.REACT_APP_APP_URL!);
+            }).catch((error) => {
+                console.error("Error saving user to database", error);
+                next(error);
+            });
+        });
 
     } catch (error) {
         console.error("Error exchanging auth code for tokens", error);
