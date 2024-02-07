@@ -27,7 +27,6 @@ app.use(cors({
 app.use(cors({origin: process.env.REACT_APP_APP_URL, credentials: true}));
 
 app.use(express.json());
-app.use(cookieParser());
 
 const sessionSecret = process.env.SESSION_SECRET || "MeinSuperGeheimesGeheimnis";
 app.use(session({
@@ -41,6 +40,8 @@ app.use(session({
         maxAge: 30 * 60 * 1000 // 30 minutes
     }
 }));
+
+app.use(cookieParser());
 
 const PORT = process.env.PORT || 8000;
 
