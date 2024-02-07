@@ -103,6 +103,7 @@ router.post("/disconnect", async (req: Request, res: Response) => {
 });
 
 router.get('/verify-session', (req, res) => {
+    console.log('Session data in verify:', req.session);
     const sessionToken = req.cookies['session_token'];
     console.log("sessionToken from cookie:", sessionToken);
     console.log("accessToken from session:", req.session!.accessToken);
