@@ -24,7 +24,12 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(cors({origin: process.env.REACT_APP_APP_URL, credentials: true}));
+app.use(cors({
+    origin: process.env.REACT_APP_APP_URL,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', '*'],
+    credentials: true
+}));
 
 app.use(express.json());
 
