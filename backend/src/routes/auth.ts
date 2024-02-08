@@ -56,7 +56,6 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
 
         console.log('Session data after setting:', req.session);
 
-
         // res.cookie('session_token', response.data.access_token, {httpOnly: true, secure: true, sameSite: 'strict'});
         req.session!.save(err => {
             if (err) {
@@ -66,6 +65,7 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
             res.cookie('session_token', response.data.access_token, {
                 httpOnly: true,
                 secure: true,
+                sameSite: 'none'
             });
 
             const userCollection = db.collection('users');
