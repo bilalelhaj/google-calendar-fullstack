@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 async function sign(val: string, secret: string): Promise<string>
 {
     if (typeof val !== 'string') throw new TypeError("Cookie value must be provided as a string.")
