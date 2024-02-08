@@ -1,15 +1,18 @@
 import express, {Request, Response, NextFunction} from 'express';
 import {db} from '../db';
 import {fetchAndStoreEvents} from '../eventHelpers';
+import {sessionHandler} from "../middleware/sessionHandler";
 
 const router = express.Router();
 
+router.use(sessionHandler);
+
 router.get('/get-user-email', async (req, res) => {
-    if (!req.session!.accessToken || !req.session!.userId) {
+    if (!req.headers['x-access-token'] || !req.headers['x-user-id']) {
         return res.status(401).send("Unauthorized");
     }
 
-    const userId = req.session!.userId;
+    const userId = req.headers['x-user-id'] as string;
     const userCollection = db.collection('users');
     const userDoc = await userCollection.doc(userId).get();
     const user = userDoc.data();
@@ -22,12 +25,12 @@ router.get('/get-user-email', async (req, res) => {
 });
 
 router.get('/get-db-events', async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.session!.accessToken || !req.session!.userId) {
+    if (!req.headers['x-access-token'] || !req.headers['x-user-id']) {
         return res.status(401).send("Unauthorized");
     }
 
-    const userId = req.session!.userId;
-    const accessToken = req.session!.accessToken;
+    const userId = req.headers['x-user-id'] as string;
+    const accessToken = req.headers['x-access-token'] as string;
 
     try {
         await fetchAndStoreEvents(userId, accessToken);

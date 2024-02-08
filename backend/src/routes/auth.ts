@@ -4,10 +4,10 @@ import jwt from 'jsonwebtoken';
 import dotenv from "dotenv";
 import {db} from '../db';
 import path from 'path';
-import { connect } from 'http2'
-import { sign, unsign } from '../modules/security/cookie-signature-edge'
-import { SessionKey } from '../modules/security/cookie-session/constants'
-import { sessionSecret } from '../contants'
+import {sign} from '../modules/security/cookie-signature-edge'
+import {SessionKey} from '../modules/security/cookie-session/constants'
+import {sessionSecret} from '../constants'
+import {sessionHandler} from "../middleware/sessionHandler";
 
 dotenv.config({path: path.resolve(__dirname, '../../.env')});
 
@@ -55,16 +55,15 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
         const idToken = response.data.id_token;
         const decoded = jwt.decode(idToken) as jwt.JwtPayload;
 
-        req.session!.userId = decoded.sub;
-        req.session!.accessToken = response.data.access_token;
+        const sessionData = {
+            userId: decoded.sub,
+            accessToken: response.data.access_token
+        }
 
-        console.log(req.session);
-
-        
-        res.cookie(SessionKey, await sign(btoa(response.data.access_token), sessionSecret), {
+        res.cookie(SessionKey, await sign(btoa(JSON.stringify(sessionData)), sessionSecret), {
             httpOnly: true,
-            secure: !(process.env.REACT_APP_APP_URL === 'http://localhost:3000'),
-            sameSite: process.env.REACT_APP_APP_URL === 'http://localhost:3000' ? 'strict' : 'none',
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
         });
 
         const userCollection = db.collection('users');
@@ -80,10 +79,11 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
     }
 });
 
-router.post("/disconnect", async (req: Request, res: Response) => {
-    delete req.session!.accessToken;
+router.post("/disconnect", sessionHandler, async (req: Request, res: Response) => {
+    delete req.headers['x-access-token'];
 
-    const userId = req.session!.userId;
+    const userId = req.headers['x-user-id'] as string;
+
     const userCollection = db.collection('users');
     await userCollection.doc(userId).delete();
 
@@ -96,21 +96,8 @@ router.post("/disconnect", async (req: Request, res: Response) => {
     res.sendStatus(200);
 });
 
-router.get('/verify-session', async (req, res) => {
-    const sessionToken = req.cookies[SessionKey];
-
-    if (!sessionToken) {
-        return res.sendStatus(401);
-    }
-
-    // Verify the sessionToken with your secret key
-    const isValid = await unsign(SessionKey, sessionSecret)
-
-    if (isValid) {
-        res.sendStatus(200);
-    } else {
-        res.sendStatus(401);
-    }
+router.get('/verify-session', sessionHandler, async (req, res) => {
+    res.sendStatus(200);
 });
 
 

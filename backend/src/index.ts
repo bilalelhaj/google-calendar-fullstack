@@ -7,6 +7,7 @@ import authRoutes from './routes/auth';
 import eventRoutes from './routes/events';
 import userRoutes from './routes/user';
 import path from "path";
+import {sessionHandler} from './middleware/sessionHandler';
 
 dotenv.config({path: path.resolve(__dirname, '../.env')});
 
