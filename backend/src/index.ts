@@ -13,8 +13,6 @@ dotenv.config({path: path.resolve(__dirname, '../.env')});
 
 const app = express();
 
-const memoryStore = new session.MemoryStore();
-
 app.use(cors({
     origin: (origin, callback) => {
         if (origin === undefined) {
@@ -40,9 +38,8 @@ const sessionSecret = process.env.SESSION_SECRET || "MeinSuperGeheimesGeheimnis"
 
 app.use(session({
     secret: sessionSecret,
-    resave: false,
+    resave: true,
     saveUninitialized: true,
-    store: memoryStore,
     cookie: {
         httpOnly: true,
         secure: true,
@@ -50,12 +47,6 @@ app.use(session({
         maxAge: 30 * 60 * 1000 // 30 minutes
     }
 }));
-
-
-app.use((req, res, next) => {
-    console.log('MemoryStore:', memoryStore);
-    next();
-});
 
 const PORT = process.env.PORT || 8000;
 

@@ -97,7 +97,7 @@ router.post("/disconnect", async (req: Request, res: Response) => {
     const events = await userEventsCollection.get();
     const deletePromises = events.docs.map(doc => doc.ref.delete());
     await Promise.all(deletePromises);
-
+    
     res.clearCookie('session_token');
     res.sendStatus(200);
 });
