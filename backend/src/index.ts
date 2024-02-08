@@ -8,9 +8,6 @@ import authRoutes from './routes/auth';
 import eventRoutes from './routes/events';
 import userRoutes from './routes/user';
 import path from "path";
-import FirestoreStore from 'firestore-store';
-
-const firestore = FirestoreStore(session);
 
 dotenv.config({path: path.resolve(__dirname, '../.env')});
 
@@ -41,32 +38,19 @@ app.use(express.json());
 
 const sessionSecret = process.env.SESSION_SECRET || "MeinSuperGeheimesGeheimnis";
 
-// app.use(session({
-//     secret: sessionSecret,
-//     resave: false,
-//     saveUninitialized: true,
-//     store: memoryStore,
-//     cookie: {
-//         httpOnly: true,
-//         secure: true,
-//         sameSite: 'none',
-//         maxAge: 30 * 60 * 1000 // 30 minutes
-//     }
-// }));
-
 app.use(session({
-    store: new firestore({
-        database: 'calender-6ae78',
-        collection: 'sessions',
-    }),
     secret: sessionSecret,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
+    store: memoryStore,
     cookie: {
-        secure: true, // Note that the `secure` option should be true if you're serving secure (HTTPS) pages
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
         maxAge: 30 * 60 * 1000 // 30 minutes
     }
 }));
+
 
 app.use((req, res, next) => {
     console.log('MemoryStore:', memoryStore);
