@@ -66,7 +66,6 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
             res.cookie('session_token', response.data.access_token, {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'none'
             });
 
             const userCollection = db.collection('users');
@@ -97,7 +96,7 @@ router.post("/disconnect", async (req: Request, res: Response) => {
     const events = await userEventsCollection.get();
     const deletePromises = events.docs.map(doc => doc.ref.delete());
     await Promise.all(deletePromises);
-    
+
     res.clearCookie('session_token');
     res.sendStatus(200);
 });

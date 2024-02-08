@@ -38,10 +38,9 @@ const sessionSecret = process.env.SESSION_SECRET || "MeinSuperGeheimesGeheimnis"
 
 app.use(session({
     secret: sessionSecret,
-    resave: true,
+    resave: false,
     saveUninitialized: true,
     cookie: {
-        httpOnly: true,
         secure: true,
         sameSite: 'none',
         maxAge: 30 * 60 * 1000 // 30 minutes
