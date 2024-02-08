@@ -54,7 +54,10 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
         req.session!.userId = decoded.sub;
         req.session!.accessToken = response.data.access_token;
 
-        res.cookie('session_token', response.data.access_token, {httpOnly: true, secure: true, sameSite: 'strict'});
+        res.cookie('session_token', response.data.access_token, {
+            httpOnly: true,
+            secure: !(process.env.REACT_APP_APP_URL === 'http://localhost:3000')
+        });
 
         const userCollection = db.collection('users');
         await userCollection.doc(decoded.sub!).set({
