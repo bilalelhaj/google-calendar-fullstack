@@ -56,7 +56,8 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
 
         res.cookie('session_token', response.data.access_token, {
             httpOnly: true,
-            secure: !(process.env.REACT_APP_APP_URL === 'http://localhost:3000')
+            secure: !(process.env.REACT_APP_APP_URL === 'http://localhost:3000'),
+            sameSite: process.env.REACT_APP_APP_URL === 'http://localhost:3000' ? 'strict' : 'none',
         });
 
         const userCollection = db.collection('users');
