@@ -54,30 +54,14 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
         req.session!.userId = decoded.sub;
         req.session!.accessToken = response.data.access_token;
 
-        console.log('Session data after setting:', req.session);
+        res.cookie('session_token', response.data.access_token, {httpOnly: true, secure: true, sameSite: 'strict'});
 
-        // res.cookie('session_token', response.data.access_token, {httpOnly: true, secure: true, sameSite: 'strict'});
-        req.session!.save(err => {
-            if (err) {
-                console.log('Error saving session:', err);
-            }
-
-            res.cookie('session_token', response.data.access_token, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'none'
-            });
-
-            const userCollection = db.collection('users');
-            userCollection.doc(decoded.sub!).set({
-                email: decoded.email,
-            }).then(() => {
-                res.redirect(process.env.REACT_APP_APP_URL!);
-            }).catch((error) => {
-                console.error("Error saving user to database", error);
-                next(error);
-            });
+        const userCollection = db.collection('users');
+        await userCollection.doc(decoded.sub!).set({
+            email: decoded.email,
         });
+
+        res.redirect(process.env.REACT_APP_APP_URL!);
 
     } catch (error) {
         console.error("Error exchanging auth code for tokens", error);
@@ -102,11 +86,7 @@ router.post("/disconnect", async (req: Request, res: Response) => {
 });
 
 router.get('/verify-session', (req, res) => {
-    console.log('Session data in verify:', req.session);
     const sessionToken = req.cookies['session_token'];
-    console.log("sessionToken from cookie:", sessionToken);
-    console.log("accessToken from session:", req.session!.accessToken);
-
 
     if (!sessionToken || !req.session!.accessToken) {
         return res.sendStatus(401);

@@ -24,25 +24,19 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(cors({
-    origin: process.env.REACT_APP_APP_URL,
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', '*'],
-    credentials: true
-}));
-app.use(cookieParser());
+app.use(cors({origin: process.env.REACT_APP_APP_URL, credentials: true}));
 
 app.use(express.json());
+app.use(cookieParser());
 
 const sessionSecret = process.env.SESSION_SECRET || "MeinSuperGeheimesGeheimnis";
-
 app.use(session({
     secret: sessionSecret,
     resave: false,
     saveUninitialized: true,
     cookie: {
-        secure: true,
-        sameSite: 'none',
+        httpOnly: true,
+        secure: process.env.REACT_APP_APP_URL !== 'http://localhost:3000',
         maxAge: 30 * 60 * 1000 // 30 minutes
     }
 }));
