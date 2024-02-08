@@ -41,7 +41,8 @@ app.use(session({
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
-        secure: process.env.REACT_APP_APP_URL !== 'http://localhost:3000',
+        sameSite: process.env.REACT_APP_APP_URL === 'http://localhost:3000' ? 'strict' : 'none',
+        secure: !(process.env.REACT_APP_APP_URL === 'http://localhost:3000'),
         maxAge: 30 * 60 * 1000 // 30 minutes
     }
 }));
