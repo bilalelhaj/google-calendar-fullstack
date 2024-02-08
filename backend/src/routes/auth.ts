@@ -51,10 +51,10 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
         const idToken = response.data.id_token;
         const decoded = jwt.decode(idToken) as jwt.JwtPayload;
 
-        console.log(req.session);
-
         req.session!.userId = decoded.sub;
         req.session!.accessToken = response.data.access_token;
+
+        console.log(req.session);
 
         res.cookie('session_token', response.data.access_token, {
             httpOnly: true,
