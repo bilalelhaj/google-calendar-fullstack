@@ -92,6 +92,9 @@ router.post("/disconnect", async (req: Request, res: Response) => {
 router.get('/verify-session', (req, res) => {
     const sessionToken = req.cookies['session_token'];
 
+    console.log('sessionToken', sessionToken);
+    console.log('accessToken', req.session!.accessToken);
+
     if (!sessionToken || !req.session!.accessToken) {
         return res.sendStatus(401);
     }
