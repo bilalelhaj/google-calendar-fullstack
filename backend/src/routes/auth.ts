@@ -4,6 +4,10 @@ import jwt from 'jsonwebtoken';
 import dotenv from "dotenv";
 import {db} from '../db';
 import path from 'path';
+import { connect } from 'http2'
+import { sign, unsign } from '../modules/security/cookie-signature-edge'
+import { SessionKey } from '../modules/security/cookie-session/constants'
+import { sessionSecret } from '../contants'
 
 dotenv.config({path: path.resolve(__dirname, '../../.env')});
 
@@ -56,7 +60,8 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
 
         console.log(req.session);
 
-        res.cookie('session_token', response.data.access_token, {
+        
+        res.cookie(SessionKey, await sign(btoa(response.data.access_token), sessionSecret), {
             httpOnly: true,
             secure: !(process.env.REACT_APP_APP_URL === 'http://localhost:3000'),
             sameSite: process.env.REACT_APP_APP_URL === 'http://localhost:3000' ? 'strict' : 'none',
@@ -87,21 +92,19 @@ router.post("/disconnect", async (req: Request, res: Response) => {
     const deletePromises = events.docs.map(doc => doc.ref.delete());
     await Promise.all(deletePromises);
 
-    res.clearCookie('session_token');
+    res.clearCookie(SessionKey);
     res.sendStatus(200);
 });
 
-router.get('/verify-session', (req, res) => {
-    const sessionToken = req.cookies['session_token'];
+router.get('/verify-session', async (req, res) => {
+    const sessionToken = req.cookies[SessionKey];
 
-    console.log('sessionToken', sessionToken);
-    console.log('accessToken', req.session!.accessToken);
-
-    if (!sessionToken || !req.session!.accessToken) {
+    if (!sessionToken) {
         return res.sendStatus(401);
     }
 
-    const isValid = sessionToken === req.session!.accessToken;
+    // Verify the sessionToken with your secret key
+    const isValid = await unsign(SessionKey, sessionSecret)
 
     if (isValid) {
         res.sendStatus(200);
