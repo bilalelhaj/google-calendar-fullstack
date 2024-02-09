@@ -1,1 +1,1 @@
-export const SessionKey = '_sid'
+export const SessionKey = 'sid'
