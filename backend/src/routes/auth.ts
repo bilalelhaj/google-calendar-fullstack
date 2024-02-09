@@ -62,9 +62,8 @@ router.get("/oauth-callback", async (req: Request, res: Response, next: NextFunc
 
         res.cookie(SessionKey, await sign(btoa(JSON.stringify(sessionData)), sessionSecret), {
             httpOnly: true,
-            // secure: process.env.NODE_ENV === 'production',
-            secure: false,
-            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'strict',
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
             priority: 'high'
         });
 
